@@ -471,7 +471,8 @@ class Affiliates_Registration {
 			$errors->add( 'invalid_email', __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'affiliates' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
-			$errors->add( 'email_exists', __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'affiliates' ) );
+		    	// allows duplicate email
+			// $errors->add( 'email_exists', __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'affiliates' ) );
 		}
 
 		do_action( 'register_post', $sanitized_user_login, $user_email, $errors );
@@ -644,6 +645,13 @@ class Affiliates_Registration {
 		$create_affiliate_userdata = $userdata;
 
 		$user_id = wp_insert_user( $_userdata );
+		
+		// allows duplicate email
+		if ( is_wp_error( $user_id ) && $user_id->get_error_code() === 'existing_user_email' ) {
+		    $user = get_user_by( 'email', $userdata['user_email'] );
+		    $user_id = $user->ID;
+		}
+		
 		if ( !is_wp_error( $user_id ) ) {
 			// add user meta from remaining fields
 			foreach( $userdata as $meta_key => $meta_value ) {
