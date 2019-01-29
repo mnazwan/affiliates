@@ -507,8 +507,6 @@ class Affiliates_Registration {
 			return $errors;
 		}
 
-		update_user_option( $user_id, 'default_password_nag', true, true ); //Set up the Password change nag.
-
 		// notify new user
 		self::new_user_notification( $user_id, $user_pass );
 
@@ -646,10 +644,13 @@ class Affiliates_Registration {
 
 		$user_id = wp_insert_user( $_userdata );
 		
-		// allows duplicate email
 		if ( is_wp_error( $user_id ) && $user_id->get_error_code() === 'existing_user_email' ) {
+		    // allows duplicate email
 		    $user = get_user_by( 'email', $userdata['user_email'] );
 		    $user_id = $user->ID;
+		} else {
+		    // set up the Password change nag
+		    update_user_option( $user_id, 'default_password_nag', true, true );
 		}
 		
 		if ( !is_wp_error( $user_id ) ) {
